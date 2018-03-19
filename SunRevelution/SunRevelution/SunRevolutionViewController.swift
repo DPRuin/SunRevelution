@@ -42,7 +42,9 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         
         
         self.initNode()
-        
+        self.sunRotation()
+        self.earthTurn()
+        self.sunTurn()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -69,6 +71,7 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         // Release any cached data, images, etc that aren't in use.
     }
     
+    /// 初始化节点信息
     func initNode() {
         sunNode.geometry = SCNSphere(radius: 3)
         earthNode.geometry = SCNSphere(radius: 1)
@@ -101,6 +104,49 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         
         sunNode.addChildNode(earthGroupNode)
         self.sceneView.scene.rootNode.addChildNode(sunNode)
+    }
+    
+    /// 设置太阳自转
+    func sunRotation() {
+        let animation = CABasicAnimation(keyPath: "rotation")
+        animation.duration = 10.0
+        animation.toValue = SCNVector4(0, 1, 0, Double.pi * 2) // 绕y轴转动
+        animation.repeatCount = Float.greatestFiniteMagnitude // 有限幅度最大
+        sunNode.addAnimation(animation, forKey: "sunRotation")
+    }
+    
+    
+    /**
+     月球如何围绕地球转呢
+     可以把月球放到地球上，让地球自转月球就会跟着地球，但是月球的转动周期和地球的自转周期是不一样的，所以创建一个月球围绕地球节点（与地球节点位置相同），让月球放到地月节点上，让这个节点自转，设置转动速度即可
+     */
+    /// 设置地球自转和月亮围绕地球转
+    func earthTurn() {
+        // 地球自转
+        earthNode.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)), forKey: "earthRotation")
+        
+        // 月球自转
+        let animation = CABasicAnimation(keyPath: "rotation")
+        animation.duration = 1.5
+        animation.toValue = SCNVector4(0, 1, 0, Double.pi * 2)
+        animation.repeatCount = Float.greatestFiniteMagnitude
+        moonNode.addAnimation(animation, forKey: "moonRotation")
+        
+        // 月球公转
+        let moonRotationAnimation = CABasicAnimation(keyPath: "rotation")
+        moonRotationAnimation.duration = 5
+        moonRotationAnimation.toValue = SCNVector4(0, 1, 0, Double.pi * 2)
+        moonRotationAnimation.repeatCount = Float.greatestFiniteMagnitude
+        moonRotationNode.addAnimation(moonRotationAnimation, forKey: "moonRotationAroundEarth")
+        
+    }
+    
+    func sunTurn() {
+        let animation = CABasicAnimation(keyPath: "rotation")
+        animation.duration = 10
+        animation.toValue = SCNVector4(0, 1, 0, Double.pi * 2)
+        animation.repeatCount = Float.greatestFiniteMagnitude
+        earthGroupNode.addAnimation(animation, forKey: "earthRotationAroundSun")
     }
     
     // MARK: - ARSCNViewDelegate
