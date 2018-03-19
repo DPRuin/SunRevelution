@@ -17,7 +17,9 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
     let sunNode = SCNNode()
     let earthNode = SCNNode()
     let moonNode = SCNNode()
-    
+    let moonRotationNode = SCNNode() // 月球绕地球公转
+    let earthGroupNode = SCNNode() // 地球和月球作为一个节点，绕太阳公转
+    let sunHaloNode = SCNNode() // 太阳光晕
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,10 +34,15 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         sceneView.automaticallyUpdatesLighting = true
         
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        // let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let scene = SCNScene()
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        
+        self.initNode()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -68,10 +75,34 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         moonNode.geometry = SCNSphere(radius: 0.5)
         
         // 渲染图
+        sunNode.geometry?.firstMaterial?.multiply.contents = "art.scnassets/earth/sun.jpg"
+        sunNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/earth/sun.jpg"
+        sunNode.geometry?.firstMaterial?.multiply.intensity = 0.5 // 强度
+        sunNode.geometry?.firstMaterial?.lightingModel = .constant
         
+        earthNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/earth/earth-diffuse-mini.jpg"
+        // 地球夜光图
+        earthNode.geometry?.firstMaterial?.emission.contents = "art.scnassets/earth/earth-emissive-mini.jpg"
+        earthNode.geometry?.firstMaterial?.specular.contents = "art.scnassets/earth/earth-specular-mini.jpg"
+        
+        moonNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/earth/moon.jpg"
+        
+        // 设置位置
+        sunNode.position = SCNVector3(0, 5, -20)
+        earthGroupNode.position = SCNVector3(10, 0, 0)
+        earthNode.position = SCNVector3(3, 0, 0)
+        moonRotationNode.position = earthNode.position
+        moonNode.position = SCNVector3(3, 0, 0)
+        
+        // rootnote为sun，sun上添加earth， earth添加moon
+        moonRotationNode.addChildNode(moonNode)
+        earthGroupNode.addChildNode(earthNode)
+        earthGroupNode.addChildNode(moonRotationNode)
+        
+        sunNode.addChildNode(earthGroupNode)
+        self.sceneView.scene.rootNode.addChildNode(sunNode)
     }
     
-
     // MARK: - ARSCNViewDelegate
     
 /*
