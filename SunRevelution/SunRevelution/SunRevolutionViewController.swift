@@ -45,6 +45,7 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         self.sunRotation()
         self.earthTurn()
         self.sunTurn()
+        self.addLight()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -141,6 +142,7 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         
     }
     
+    /// 地球公转
     func sunTurn() {
         let animation = CABasicAnimation(keyPath: "rotation")
         animation.duration = 10
@@ -149,7 +151,36 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         earthGroupNode.addAnimation(animation, forKey: "earthRotationAroundSun")
     }
     
-    // MARK: - ARSCNViewDelegate
+    
+    /// 设置太阳光晕和光线照到的地方
+    func addLight() {
+        let lightNode = SCNNode()
+        lightNode.light = SCNLight()
+        lightNode.light?.color = UIColor.red
+        sunNode.addChildNode(lightNode)
+        lightNode.light?.attenuationEndDistance = 20.0 // 光照亮度随着距离改变
+        lightNode.light?.attenuationStartDistance = 1.0
+        
+        // SCNTransaction??事务
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 1
+        
+        lightNode.light?.color = UIColor.white
+        lightNode.opacity = 0.5 // 不透明度，默认为1
+        SCNTransaction.commit()
+        
+        sunHaloNode.geometry = SCNPlane(width: 25, height: 25)
+        sunHaloNode.rotation = SCNVector4(1, 0, 0,Float(0 * Double.pi / 180))
+        sunHaloNode.geometry?.firstMaterial?.diffuse.contents = "art.scnassets/earth/sun-halo.png"
+        sunHaloNode.geometry?.firstMaterial?.lightingModel = SCNMaterial.LightingModel.constant
+        
+        // 确定接收者在呈现时是否写入深度缓冲区,默认为true
+        sunHaloNode.geometry?.firstMaterial?.writesToDepthBuffer = false // 不要有厚度，看起来薄薄的一层
+        sunHaloNode.opacity = 5
+        sunNode.addChildNode(sunHaloNode)
+    }
+    
+    // MARK: - ARSCNViewDelegate1
     
 /*
     // Override to create and configure nodes for anchors added to the view's session.
