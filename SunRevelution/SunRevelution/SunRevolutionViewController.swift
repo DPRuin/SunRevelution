@@ -161,6 +161,7 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         lightNode.light?.attenuationEndDistance = 20.0 // 光照亮度随着距离改变
         lightNode.light?.attenuationStartDistance = 1.0
         
+        // MARK: - SCNTransaction??事务
         // SCNTransaction??事务
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 1
@@ -180,7 +181,7 @@ class SunRevolutionViewController: UIViewController, ARSCNViewDelegate {
         sunNode.addChildNode(sunHaloNode)
     }
     
-    // MARK: - ARSCNViewDelegate1
+    // MARK: - ARSCNViewDelegate
     
 /*
     // Override to create and configure nodes for anchors added to the view's session.
